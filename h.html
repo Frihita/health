@@ -1,0 +1,4467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthara — Your Ultimate Sahara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0B0F19;
+            --bg-secondary: #1a1f2e;
+            --accent: #FF2EB5;
+            --accent-light: #ff66d9;
+            --purple: #A855F7;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --transition: all 0.3s ease;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        body.light-mode {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1f2e;
+            --text-secondary: #5a6785;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-primary);
+            z-index: 1000;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .desert-ripple {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #A855F7 0%, #FF2EB5 100%);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 46, 181, 0.3) 0%, rgba(168, 85, 247, 0.1) 70%);
+            transform: scale(0);
+            animation: ripple-animation 8s infinite ease-out;
+        }
+
+        @keyframes ripple-animation {
+            0% {
+                transform: scale(0);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(255, 46, 181, 0.5);
+            margin-bottom: 1rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 30px rgba(255, 46, 181, 0.5);
+            }
+            to {
+                text-shadow: 0 0 40px rgba(255, 46, 181, 0.8), 0 0 50px rgba(168, 85, 247, 0.5);
+            }
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            animation: fade-in 2s ease-out;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Login/Signup Screen */
+        .auth-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .auth-container.active {
+            display: flex;
+        }
+
+        .auth-card {
+            width: 90%;
+            max-width: 400px;
+            padding: 2.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            color: var(--accent);
+            transform: rotate(180deg);
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 46, 181, 0.2);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+
+        .forgot-password {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 46, 181, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Main App Container */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            color: var(--accent);
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 0.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            color: white;
+        }
+
+        .nav-tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Dashboard */
+        .greeting {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.5);
+            border-color: var(--accent);
+        }
+
+        .dashboard-card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card-description {
+            color: var(--text-secondary);
+        }
+
+        /* Analytics Dashboard */
+        .analytics-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .analytics-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 1.5rem;
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* Physical Health Section */
+        .health-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .health-feature {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .health-feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.5);
+            border-color: var(--accent);
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Mental Health Section */
+        .mental-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .mental-feature {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .mental-feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.5);
+            border-color: var(--accent);
+        }
+
+        /* Feature Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid var(--glass-border);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* CalorieSmart Feature */
+        .caloriesmart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .calorie-setup {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .calorie-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .calorie-input {
+            flex: 1;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .meal-scanner {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .camera-section {
+            flex: 1;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .camera-placeholder {
+            font-size: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .meal-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .scan-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 46, 181, 0.3);
+        }
+
+        .nutrition-section {
+            flex: 1;
+        }
+
+        .calorie-circle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calorie-circle {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+
+        .calorie-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .calorie-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .calorie-consumed {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .calorie-total {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .nutrition-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .nutrition-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nutrition-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .nutrition-label {
+            color: var(--text-secondary);
+        }
+
+        .nutrition-value {
+            font-weight: 600;
+        }
+
+        .daily-meals {
+            margin-top: 1.5rem;
+        }
+
+        .meal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .meal-name {
+            font-weight: 500;
+        }
+
+        .meal-calories {
+            color: var(--text-secondary);
+        }
+
+        /* Recipe Generator */
+        .recipe-generator {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ingredients-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .ingredient-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .ingredient-checkbox:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .ingredient-checkbox input {
+            accent-color: var(--accent);
+        }
+
+        .craving-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .craving-select {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .recipe-result {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .recipe-result.active {
+            display: block;
+        }
+
+        .recipe-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .recipe-ingredients {
+            margin-bottom: 1rem;
+        }
+
+        .recipe-ingredients h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .recipe-ingredients ul {
+            padding-left: 1.5rem;
+        }
+
+        .recipe-instructions {
+            margin-bottom: 1rem;
+        }
+
+        .recipe-instructions h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .recipe-instructions ol {
+            padding-left: 1.5rem;
+        }
+
+        .health-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .score-badge {
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Posture Tracker */
+        .posture-tracker {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .posture-camera {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--purple);
+        }
+
+        .posture-status {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            width: 100%;
+        }
+
+        .posture-status.good {
+            color: var(--success);
+        }
+
+        .posture-status.bad {
+            color: var(--danger);
+        }
+
+        /* Daily Wellness Check */
+        .wellness-check {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .wellness-questions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .question-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .answer-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .answer-btn.selected {
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border-color: transparent;
+        }
+
+        .wellness-report {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .wellness-report.active {
+            display: block;
+        }
+
+        .report-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .report-score {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--success) 0% 70%,
+                var(--warning) 70% 90%,
+                var(--danger) 90% 100%
+            );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .score-inner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .score-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .report-recommendations {
+            margin-top: 1.5rem;
+        }
+
+        .report-recommendations h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .recommendation-list {
+            padding-left: 1.5rem;
+        }
+
+        .recommendation-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Mind Garden */
+        .mind-garden {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .garden-container {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D98E 60%, #7CB342 100%);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .garden-ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(to bottom, #7CB342 0%, #689F38 100%);
+        }
+
+        .deed-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .deed-input {
+            flex: 1;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .add-deed-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-deed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .flower {
+            position: absolute;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            animation: grow-flower 2s ease-out;
+        }
+
+        @keyframes grow-flower {
+            0% {
+                transform: scale(0) translateY(20px);
+                opacity: 0;
+            }
+            20% {
+                transform: scale(0.3) translateY(15px);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(0.6) translateY(10px);
+                opacity: 0.6;
+            }
+            60% {
+                transform: scale(0.8) translateY(5px);
+                opacity: 0.8;
+            }
+            80% {
+                transform: scale(0.95) translateY(2px);
+                opacity: 0.95;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .flower:hover {
+            transform: scale(1.1);
+        }
+
+        .flower-stem {
+            width: 4px;
+            height: 60px;
+            background: linear-gradient(to top, #4CAF50, #8BC34A);
+            border-radius: 2px;
+            animation: grow-stem 1.5s ease-out;
+        }
+
+        @keyframes grow-stem {
+            0% {
+                height: 0;
+            }
+            100% {
+                height: 60px;
+            }
+        }
+
+        .flower-head {
+            font-size: 2.5rem;
+            margin-top: -10px;
+            animation: bloom-flower 1s ease-out 0.5s both;
+        }
+
+        @keyframes bloom-flower {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        .flower-tooltip {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 10;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .flower:hover .flower-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Mood Journal */
+        .mood-journal {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mood-selector {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1rem;
+        }
+
+        .mood-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mood-option:hover {
+            transform: scale(1.1);
+        }
+
+        .mood-option.selected {
+            transform: scale(1.2);
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+        }
+
+        .mood-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .journal-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .journal-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .media-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .media-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .media-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .save-journal-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .save-journal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 46, 181, 0.3);
+        }
+
+        .download-journal-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .download-journal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        /* Releasing Ritual - Enhanced */
+        .releasing-ritual {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .thought-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+        }
+
+        .release-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg, #f87171 0%, #ef4444 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .release-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(248, 113, 113, 0.3);
+        }
+
+        .ritual-animation {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center bottom, #2d3561 0%, #1a1f2e 50%, #0B0F19 100%);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .ritual-animation.active {
+            display: block;
+        }
+
+        .thought-text {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            max-width: 80%;
+            opacity: 1;
+            transition: all 2s ease-in-out;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .thought-text.burning {
+            animation: burn-text 3s ease-in-out forwards;
+        }
+
+        @keyframes burn-text {
+            0% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+                color: #ffffff;
+            }
+            30% {
+                opacity: 0.8;
+                transform: translateX(-50%) scale(1.05);
+                color: #ffcc00;
+            }
+            60% {
+                opacity: 0.6;
+                transform: translateX(-50%) scale(1.1);
+                color: #ff9900;
+            }
+            80% {
+                opacity: 0.3;
+                transform: translateX(-50%) scale(1.15);
+                color: #ff6600;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(1.2);
+                color: #ff3300;
+            }
+        }
+
+        .flame-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 200px;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 120px;
+            background: radial-gradient(ellipse at bottom, 
+                #ffffff 0%, 
+                #ffeb3b 10%, 
+                #ff9800 30%, 
+                #ff5722 60%, 
+                #d32f2f 80%, 
+                transparent 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 0.5s infinite alternate;
+            filter: blur(2px);
+            opacity: 0;
+        }
+
+        .flame.active {
+            opacity: 1;
+            animation: flicker 0.5s infinite alternate, grow-flame 1s ease-out;
+        }
+
+        @keyframes flicker {
+            0% {
+                transform: translateX(-50%) scale(1) rotate(-2deg);
+                filter: blur(2px) brightness(1);
+            }
+            25% {
+                transform: translateX(-50%) scale(1.05) rotate(1deg);
+                filter: blur(1px) brightness(1.1);
+            }
+            50% {
+                transform: translateX(-50%) scale(0.95) rotate(-1deg);
+                filter: blur(3px) brightness(0.9);
+            }
+            75% {
+                transform: translateX(-50%) scale(1.02) rotate(2deg);
+                filter: blur(1px) brightness(1.05);
+            }
+            100% {
+                transform: translateX(-50%) scale(1) rotate(-2deg);
+                filter: blur(2px) brightness(1);
+            }
+        }
+
+        @keyframes grow-flame {
+            0% {
+                height: 0;
+                width: 0;
+            }
+            100% {
+                height: 120px;
+                width: 80px;
+            }
+        }
+
+        .inner-flame {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 60px;
+            background: radial-gradient(ellipse at bottom, 
+                #ffffff 0%, 
+                #ffeb3b 20%, 
+                #ffc107 50%, 
+                transparent 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: inner-flicker 0.3s infinite alternate;
+            filter: blur(1px);
+        }
+
+        @keyframes inner-flicker {
+            0% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateX(-50%) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .sparks {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            animation: fly-up 2s ease-out forwards;
+        }
+
+        @keyframes fly-up {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y));
+                opacity: 0;
+            }
+        }
+
+        .lantern {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 100px;
+            opacity: 0;
+        }
+
+        .lantern.active {
+            animation: float-up 5s ease-out forwards;
+        }
+
+        .lantern-body {
+            width: 60px;
+            height: 80px;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 215, 0, 0.9) 0%, 
+                rgba(255, 165, 0, 0.7) 50%, 
+                rgba(255, 69, 0, 0.5) 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: glow-lantern 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-lantern {
+            0% {
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .lantern-top {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            background: #8B4513;
+            border-radius: 50%;
+        }
+
+        .lantern-string {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background: #8B4513;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(0) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-50px) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-200px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-300px) scale(0.8);
+            }
+        }
+
+        /* Mind Assessment */
+        .mind-assessment {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .assessment-questions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .assessment-question {
+            margin-bottom: 1.5rem;
+        }
+
+        .assessment-question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .assessment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .assessment-option {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .assessment-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .assessment-option.selected {
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border-color: transparent;
+        }
+
+        .submit-assessment-btn {
+            padding: 1rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .submit-assessment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 46, 181, 0.3);
+        }
+
+        .assessment-result {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .assessment-result.active {
+            display: block;
+        }
+
+        .result-score {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-advice {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .result-recommendations {
+            margin-top: 1.5rem;
+        }
+
+        .result-recommendations h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .recommendation-list {
+            padding-left: 1.5rem;
+        }
+
+        .recommendation-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Reports Section */
+        .reports-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .report-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* pH Test Report */
+        .ph-meter {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(90deg, #f87171 0%, #fbbf24 50%, #4ade80 100%);
+            border-radius: 15px;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .ph-indicator {
+            position: absolute;
+            top: -10px;
+            width: 10px;
+            height: 50px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            transition: left 1s ease;
+        }
+
+        .ph-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .ph-value {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .ph-suggestion {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Health Card */
+        .health-card-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-field label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-field input, .form-field select {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        /* Fixed dropdown styles */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23b8c1ec' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        select option {
+            background-color: var(--bg-secondary);
+            color: #000000; /* Black text for dropdown options */
+        }
+
+        .generate-card-btn {
+            padding: 0.8rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .generate-card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 46, 181, 0.3);
+        }
+
+        .download-card-btn {
+            padding: 0.8rem;
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .download-card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .generated-card {
+            background: white;
+            color: #1a1f2e;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generated-card.active {
+            display: block;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .card-date {
+            color: #5a6785;
+            font-size: 0.9rem;
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-info-label {
+            color: #5a6785;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .card-info-value {
+            font-weight: 600;
+        }
+
+        .card-bmi {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 46, 181, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bmi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FF2EB5;
+        }
+
+        .bmi-category {
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(90deg, #FF2EB5 0%, #A855F7 100%);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .card-qr {
+            width: 80px;
+            height: 80px;
+            background: #f5f7fa;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+        }
+
+        /* Saved Reports */
+        .saved-reports {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .saved-reports-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .report-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .report-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-report-btn, .download-report-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-report-btn:hover, .download-report-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* File upload styling */
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .file-upload-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .meal-scanner {
+                flex-direction: column;
+            }
+
+            .health-card-form {
+                grid-template-columns: 1fr;
+            }
+
+            .card-info {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="desert-ripple">
+            <div class="ripple" style="top: 20%; left: 30%; width: 200px; height: 200px;"></div>
+            <div class="ripple" style="top: 60%; left: 70%; width: 300px; height: 300px; animation-delay: 2s;"></div>
+            <div class="ripple" style="top: 40%; left: 50%; width: 250px; height: 250px; animation-delay: 4s;"></div>
+        </div>
+        <h1 class="logo">Healthara</h1>
+        <p class="tagline">Your Ultimate Sahara.</p>
+    </div>
+
+    <!-- Login/Signup Screen -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-card">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <h2 class="auth-title">Welcome to Healthara</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe">Remember Me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container" id="appContainer">
+        <header>
+            <h1 class="header-title">Healthara</h1>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span id="userName">User</span>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <nav>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+                <button class="nav-tab" data-tab="physical">Physical Health</button>
+                <button class="nav-tab" data-tab="mental">Mental Health</button>
+                <button class="nav-tab" data-tab="reports">Reports</button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Section -->
+        <div class="content-section active" id="dashboard">
+            <h2 class="greeting">Hello, <span id="greetingName">User</span>! Welcome to your health dashboard.</h2>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card" data-section="physical">
+                    <div class="dashboard-card-icon">💪</div>
+                    <h3 class="dashboard-card-title">Physical Health</h3>
+                    <p class="dashboard-card-description">Track your nutrition, posture, and daily wellness</p>
+                </div>
+                <div class="dashboard-card" data-section="mental">
+                    <div class="dashboard-card-icon">🧠</div>
+                    <h3 class="dashboard-card-title">Mental Health</h3>
+                    <p class="dashboard-card-description">Nurture your mind with mood tracking and mindfulness</p>
+                </div>
+                <div class="dashboard-card" data-section="reports">
+                    <div class="dashboard-card-icon">📊</div>
+                    <h3 class="dashboard-card-title">Reports</h3>
+                    <p class="dashboard-card-description">View your health reports and analytics</p>
+                </div>
+            </div>
+
+            <div class="analytics-container">
+                <h3 class="analytics-title">Health Analytics Overview</h3>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h4 class="chart-title">Weekly Activity</h4>
+                        <canvas id="weeklyActivityChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="chart-title">Nutrition Breakdown</h4>
+                        <canvas id="nutritionChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="chart-title">Mood Trends</h4>
+                        <canvas id="moodChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="chart-title">Wellness Score</h4>
+                        <canvas id="wellnessChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Physical Health Section -->
+        <div class="content-section" id="physical">
+            <div class="health-features">
+                <div class="health-feature" data-feature="caloriesmart">
+                    <div class="feature-header">
+                        <div class="feature-icon">🍎</div>
+                        <h3 class="feature-title">CalorieSmart — AI Meal Insight</h3>
+                    </div>
+                    <p class="feature-description">Detect calories and nutrients from a photo of your meal.</p>
+                </div>
+                <div class="health-feature" data-feature="recipe">
+                    <div class="feature-header">
+                        <div class="feature-icon">🥗</div>
+                        <h3 class="feature-title">Aaj Ki Akhara — Smart Recipe Generator</h3>
+                    </div>
+                    <p class="feature-description">Enter ingredients you have → AI suggests healthy recipes.</p>
+                </div>
+                <div class="health-feature" data-feature="posture">
+                    <div class="feature-header">
+                        <div class="feature-icon">🧍</div>
+                        <h3 class="feature-title">Posture Tracker</h3>
+                    </div>
+                    <p class="feature-description">Uses camera to detect sitting/standing posture.</p>
+                </div>
+                <div class="health-feature" data-feature="wellness">
+                    <div class="feature-header">
+                        <div class="feature-icon">💖</div>
+                        <h3 class="feature-title">Daily Wellness Check</h3>
+                    </div>
+                    <p class="feature-description">Self-assessment questions to track your wellness.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mental Health Section -->
+        <div class="content-section" id="mental">
+            <div class="mental-features">
+                <div class="mental-feature" data-feature="mindgarden">
+                    <div class="feature-header">
+                        <div class="feature-icon">🌸</div>
+                        <h3 class="feature-title">Mind Garden</h3>
+                    </div>
+                    <p class="feature-description">For every good deed entered, a flower grows.</p>
+                </div>
+                <div class="mental-feature" data-feature="moodjournal">
+                    <div class="feature-header">
+                        <div class="feature-icon">📓</div>
+                        <h3 class="feature-title">Mood Journal</h3>
+                    </div>
+                    <p class="feature-description">Bedtime journaling space to write your feelings.</p>
+                </div>
+                <div class="mental-feature" data-feature="releasing">
+                    <div class="feature-header">
+                        <div class="feature-icon">🔥</div>
+                        <h3 class="feature-title">Releasing Ritual</h3>
+                    </div>
+                    <p class="feature-description">Write your negative thought → watch it burn → lantern rises.</p>
+                </div>
+                <div class="mental-feature" data-feature="assessment">
+                    <div class="feature-header">
+                        <div class="feature-icon">🌬️</div>
+                        <h3 class="feature-title">Mind Assessment</h3>
+                    </div>
+                    <p class="feature-description">Comprehensive mental health assessment with recommendations.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div class="content-section" id="reports">
+            <div class="reports-container">
+                <div class="report-card">
+                    <h3 class="report-title">
+                        <span class="report-icon">💧</span>
+                        pH Test Report
+                    </h3>
+                    <div class="ph-meter">
+                        <div class="ph-indicator" id="phIndicator" style="left: 50%;"></div>
+                    </div>
+                    <div class="ph-labels">
+                        <span>Acidic (4.5)</span>
+                        <span>Neutral (7.0)</span>
+                        <span>Alkaline (9.0)</span>
+                    </div>
+                    <div class="ph-value" id="phValue">7.0</div>
+                    <div class="ph-suggestion">
+                        <p>Your urine pH is in the normal range. Continue to stay hydrated and maintain a balanced diet.</p>
+                    </div>
+                    <button class="scan-btn" id="connectPhSensorBtn">Connect pH Sensor</button>
+                </div>
+
+                <div class="report-card">
+                    <h3 class="report-title">
+                        <span class="report-icon">📋</span>
+                        Health Card
+                    </h3>
+                    <form id="healthCardForm">
+                        <div class="health-card-form">
+                            <div class="form-field">
+                                <label for="cardName">Name</label>
+                                <input type="text" id="cardName" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardAge">Age</label>
+                                <input type="number" id="cardAge" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardGender">Gender</label>
+                                <select id="cardGender" required>
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardWeight">Weight (kg)</label>
+                                <input type="number" id="cardWeight" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardHeight">Height (cm)</label>
+                                <input type="number" id="cardHeight" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardBloodGroup">Blood Group</label>
+                                <select id="cardBloodGroup" required>
+                                    <option value="">Select</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="cardAllergies">Allergies</label>
+                                <input type="text" id="cardAllergies">
+                            </div>
+                            <div class="form-field">
+                                <label for="cardActivityLevel">Activity Level</label>
+                                <select id="cardActivityLevel" required>
+                                    <option value="">Select</option>
+                                    <option value="sedentary">Sedentary</option>
+                                    <option value="light">Light</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="active">Active</option>
+                                    <option value="very-active">Very Active</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="cardHealthGoal">Health Goal</label>
+                            <input type="text" id="cardHealthGoal" required>
+                        </div>
+                        <button type="submit" class="generate-card-btn">Generate Health Card</button>
+                    </form>
+                    <div class="generated-card" id="generatedCard">
+                        <div class="card-header">
+                            <div class="card-logo">Healthara</div>
+                            <div class="card-date" id="cardDate"></div>
+                        </div>
+                        <div class="card-info">
+                            <div class="card-info-item">
+                                <div class="card-info-label">Name</div>
+                                <div class="card-info-value" id="cardInfoName"></div>
+                            </div>
+                            <div class="card-info-item">
+                                <div class="card-info-label">Age</div>
+                                <div class="card-info-value" id="cardInfoAge"></div>
+                            </div>
+                            <div class="card-info-item">
+                                <div class="card-info-label">Gender</div>
+                                <div class="card-info-value" id="cardInfoGender"></div>
+                            </div>
+                            <div class="card-info-item">
+                                <div class="card-info-label">Blood Group</div>
+                                <div class="card-info-value" id="cardInfoBloodGroup"></div>
+                            </div>
+                            <div class="card-info-item">
+                                <div class="card-info-label">Allergies</div>
+                                <div class="card-info-value" id="cardInfoAllergies"></div>
+                            </div>
+                            <div class="card-info-item">
+                                <div class="card-info-label">Activity Level</div>
+                                <div class="card-info-value" id="cardInfoActivityLevel"></div>
+                            </div>
+                        </div>
+                        <div class="card-bmi">
+                            <div>
+                                <div class="card-info-label">BMI</div>
+                                <div class="bmi-value" id="bmiValue"></div>
+                            </div>
+                            <div class="bmi-category" id="bmiCategory"></div>
+                        </div>
+                        <div class="card-info-item">
+                            <div class="card-info-label">Health Goal</div>
+                            <div class="card-info-value" id="cardInfoHealthGoal"></div>
+                        </div>
+                        <div class="card-qr">
+                            <i class="fas fa-qrcode" style="font-size: 2rem; color: #5a6785;"></i>
+                        </div>
+                    </div>
+                    <button class="download-card-btn" id="downloadCardBtn" style="display: none;">Download Health Card (PDF)</button>
+                </div>
+
+                <div class="saved-reports">
+                    <h3 class="saved-reports-title">
+                        <span class="report-icon">📁</span>
+                        Saved Reports
+                    </h3>
+                    <div class="reports-list" id="reportsList">
+                        <!-- Reports will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Modals -->
+    <!-- CalorieSmart Modal -->
+    <div class="modal" id="caloriesmartModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="caloriesmartModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">CalorieSmart — AI Meal Insight</h2>
+            <div class="caloriesmart-container">
+                <div class="calorie-setup">
+                    <h3>Set Your Daily Calorie Goal</h3>
+                    <div class="calorie-input-group">
+                        <input type="number" class="calorie-input" id="ageInput" placeholder="Your Age">
+                        <select class="calorie-input" id="genderSelect">
+                            <option value="">Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <select class="calorie-input" id="activitySelect">
+                            <option value="">Activity Level</option>
+                            <option value="sedentary">Sedentary</option>
+                            <option value="light">Light</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="active">Active</option>
+                            <option value="very-active">Very Active</option>
+                        </select>
+                    </div>
+                    <button class="scan-btn" id="suggestCaloriesBtn">Suggest Calorie Intake</button>
+                    <div class="calorie-input-group" style="margin-top: 1rem;">
+                        <input type="number" class="calorie-input" id="customCalorieInput" placeholder="Or enter custom calorie goal">
+                    </div>
+                </div>
+                
+                <div class="meal-scanner">
+                    <div class="camera-section">
+                        <div class="camera-preview" id="mealCameraPreview">
+                            <div class="camera-placeholder">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="file-upload">
+                            <input type="file" id="mealImageUpload" accept="image/*">
+                            <label for="mealImageUpload" class="file-upload-label">
+                                <i class="fas fa-upload"></i> Upload Food Image
+                            </label>
+                        </div>
+                        <input type="text" class="meal-input" id="mealNameInput" placeholder="Enter meal name (optional)">
+                        <button class="scan-btn" id="analyzeMealBtn">📸 Analyze Meal</button>
+                    </div>
+                    
+                    <div class="nutrition-section">
+                        <div class="calorie-circle-container">
+                            <div class="calorie-circle">
+                                <canvas id="calorieChart" class="calorie-chart"></canvas>
+                                <div class="calorie-text">
+                                    <div class="calorie-consumed" id="calorieConsumed">0</div>
+                                    <div class="calorie-total" id="calorieTotal">2000 kcal</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="nutrition-info">
+                            <h4>Today's Nutrition</h4>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Calories</span>
+                                <span class="nutrition-value" id="totalCalories">0 kcal</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Proteins</span>
+                                <span class="nutrition-value" id="totalProteins">0g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Carbs</span>
+                                <span class="nutrition-value" id="totalCarbs">0g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Fats</span>
+                                <span class="nutrition-value" id="totalFats">0g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Sugar</span>
+                                <span class="nutrition-value" id="totalSugar">0g</span>
+                            </div>
+                        </div>
+                        
+                        <div class="daily-meals">
+                            <h4>Today's Meals</h4>
+                            <div id="mealsList">
+                                <!-- Meals will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Generator Modal -->
+    <div class="modal" id="recipeModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="recipeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Aaj Ki Akhara — Smart Recipe Generator</h2>
+            <div class="recipe-generator">
+                <div class="ingredients-section">
+                    <h3>Select Ingredients You Have</h3>
+                    <div class="ingredients-grid" id="ingredientsGrid">
+                        <!-- Ingredients will be added here -->
+                    </div>
+                </div>
+                
+                <div class="craving-section">
+                    <h3>Unhealthy Craving?</h3>
+                    <select class="craving-select" id="cravingSelect">
+                        <option value="">Select a craving</option>
+                        <option value="ice-cream">Ice Cream</option>
+                        <option value="chocolate">Chocolate</option>
+                        <option value="chips">Chips</option>
+                        <option value="pizza">Pizza</option>
+                        <option value="burger">Burger</option>
+                        <option value="soda">Soda</option>
+                        <option value="candy">Candy</option>
+                        <option value="fried-food">Fried Food</option>
+                    </select>
+                </div>
+                
+                <button class="scan-btn" id="generateRecipeBtnModal">Generate Recipe</button>
+                
+                <div class="recipe-result" id="recipeResult">
+                    <h3 class="recipe-title" id="recipeTitle">Healthy Recipe</h3>
+                    <div class="recipe-ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul id="recipeIngredients">
+                            <!-- Ingredients will be added here -->
+                        </ul>
+                    </div>
+                    <div class="recipe-instructions">
+                        <h4>Instructions:</h4>
+                        <ol id="recipeInstructions">
+                            <!-- Instructions will be added here -->
+                        </ol>
+                    </div>
+                    <div class="health-score">
+                        <span>Health Score:</span>
+                        <span class="score-badge" id="healthScore">8.5/10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posture Tracker Modal -->
+    <div class="modal" id="postureModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="postureModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Posture Tracker</h2>
+            <div class="posture-tracker">
+                <div class="posture-camera" id="postureCamera">
+                    <div class="camera-placeholder">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                <div class="posture-status good" id="postureStatus">Perfect Posture 🌟</div>
+                <button class="scan-btn" id="startPostureTracking">Start Tracking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Wellness Check Modal -->
+    <div class="modal" id="wellnessModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="wellnessModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Daily Wellness Check</h2>
+            <div class="wellness-check">
+                <div class="wellness-questions">
+                    <div id="wellnessQuestionsContainer">
+                        <!-- Questions will be added here -->
+                    </div>
+                    <button class="scan-btn" id="submitWellnessCheck">Submit Check</button>
+                </div>
+                
+                <div class="wellness-report" id="wellnessReport">
+                    <h3 class="report-title">Your Wellness Report</h3>
+                    <div class="report-score">
+                        <div class="score-circle">
+                            <div class="score-inner" id="wellnessScore">75%</div>
+                        </div>
+                        <div class="score-label">Wellness Score</div>
+                    </div>
+                    <div class="report-recommendations">
+                        <h4>Recommendations:</h4>
+                        <ul class="recommendation-list" id="wellnessRecommendations">
+                            <!-- Recommendations will be added here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mind Garden Modal -->
+    <div class="modal" id="mindgardenModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="mindgardenModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Mind Garden</h2>
+            <div class="mind-garden">
+                <div class="garden-container" id="gardenContainer">
+                    <div class="garden-ground"></div>
+                </div>
+                <div class="deed-input-container">
+                    <input type="text" class="deed-input" id="deedInput" placeholder="Enter a good deed you did today...">
+                    <button class="add-deed-btn" id="addDeedBtn">Add Deed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Journal Modal -->
+    <div class="modal" id="moodjournalModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="moodjournalModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Mood Journal</h2>
+            <div class="mood-journal">
+                <div class="mood-selector">
+                    <div class="mood-option" data-mood="very-happy">
+                        <div class="mood-emoji">😄</div>
+                        <div class="mood-label">Very Happy</div>
+                    </div>
+                    <div class="mood-option" data-mood="happy">
+                        <div class="mood-emoji">😊</div>
+                        <div class="mood-label">Happy</div>
+                    </div>
+                    <div class="mood-option" data-mood="neutral">
+                        <div class="mood-emoji">😐</div>
+                        <div class="mood-label">Neutral</div>
+                    </div>
+                    <div class="mood-option" data-mood="sad">
+                        <div class="mood-emoji">😢</div>
+                        <div class="mood-label">Sad</div>
+                    </div>
+                    <div class="mood-option" data-mood="very-sad">
+                        <div class="mood-emoji">😭</div>
+                        <div class="mood-label">Very Sad</div>
+                    </div>
+                </div>
+                <textarea class="journal-textarea" id="journalText" placeholder="How are you feeling today? Write your thoughts here..."></textarea>
+                <div class="journal-actions">
+                    <div class="media-controls">
+                        <button class="media-btn" id="playStoriesBtn">
+                            <i class="fas fa-play"></i> Stories
+                        </button>
+                        <button class="media-btn" id="playMusicBtn">
+                            <i class="fas fa-music"></i> Music
+                        </button>
+                    </div>
+                    <div>
+                        <button class="save-journal-btn" id="saveJournalBtn">Save Journal</button>
+                        <button class="download-journal-btn" id="downloadJournalBtn">Download Entry</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Releasing Ritual Modal -->
+    <div class="modal" id="releasingModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="releasingModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Releasing Ritual</h2>
+            <div class="releasing-ritual">
+                <textarea class="thought-input" id="thoughtInput" placeholder="Write your negative thought here..."></textarea>
+                <button class="release-btn" id="releaseThoughtBtn">Release Thought</button>
+                <div class="ritual-animation" id="ritualAnimation">
+                    <div class="thought-text" id="thoughtText"></div>
+                    <div class="flame-container">
+                        <div class="flame" id="flame">
+                            <div class="inner-flame"></div>
+                        </div>
+                    </div>
+                    <div class="sparks" id="sparks"></div>
+                    <div class="lantern" id="lantern">
+                        <div class="lantern-string"></div>
+                        <div class="lantern-top"></div>
+                        <div class="lantern-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mind Assessment Modal -->
+    <div class="modal" id="assessmentModal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="assessmentModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Mind Assessment</h2>
+            <div class="mind-assessment">
+                <div class="assessment-questions" id="assessmentQuestions">
+                    <!-- Questions will be added here -->
+                </div>
+                <button class="submit-assessment-btn" id="submitAssessmentBtn">Submit Assessment</button>
+                <div class="assessment-result" id="assessmentResult">
+                    <div class="result-score" id="mentalHealthScore">Mental Health Score: 75/100</div>
+                    <div class="result-advice">
+                        <p>Your mental health assessment results:</p>
+                    </div>
+                    <div class="result-recommendations">
+                        <h4>Recommendations:</h4>
+                        <ul class="recommendation-list" id="assessmentRecommendations">
+                            <!-- Recommendations will be added here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const appState = {
+            user: null,
+            theme: 'dark',
+            wellnessStreak: 3,
+            gardenFlowers: [],
+            selectedMood: null,
+            postureTracking: false,
+            dailyCalorieGoal: 2000,
+            consumedCalories: 0,
+            dailyMeals: [],
+            nutritionData: {
+                calories: 0,
+                proteins: 0,
+                carbs: 0,
+                fats: 0,
+                sugar: 0
+            },
+            savedReports: [],
+            journalEntries: [],
+            uploadedMealImage: null
+        };
+
+        // API Keys - Replace with your actual API keys
+        const API_KEYS = {
+            nutrition: "AIzaSyABdgOT5K9BLCg7MpPbYQAQHSwNYdZMrYA", // Add your nutrition API key here (e.g., Edamam, USDA)
+            recipe: "AIzaSyABdgOT5K9BLCg7MpPbYQAQHSwNYdZMrYA", // Add your recipe API key here (e.g., Spoonacular, Edamam)
+            vision: "AIzaSyABdgOT5K9BLCg7MpPbYQAQHSwNYdZMrYA", // Add your vision API key here (e.g., Google Vision, Clarifai)
+            pose: "AIzaSyABdgOT5K9BLCg7MpPbYQAQHSwNYdZMrYA" // Add your pose detection API key here (e.g., TensorFlow.js, MediaPipe)
+        };
+
+        // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const authContainer = document.getElementById('authContainer');
+        const appContainer = document.getElementById('appContainer');
+        const authForm = document.getElementById('authForm');
+        const themeToggle = document.getElementById('themeToggle');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const contentSections = document.querySelectorAll('.content-section');
+        const modalCloseBtns = document.querySelectorAll('.modal-close');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const greetingName = document.getElementById('greetingName');
+
+        // Initialize App
+        function initApp() {
+            // Show splash screen for 3 seconds
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                authContainer.classList.add('active');
+            }, 3000);
+
+            // Event Listeners
+            authForm.addEventListener('submit', handleAuth);
+            themeToggle.addEventListener('click', toggleTheme);
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // Navigation
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            // Modal Close Buttons
+            modalCloseBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modalId = btn.dataset.modal;
+                    document.getElementById(modalId).classList.remove('active');
+                });
+            });
+
+            // Dashboard Cards
+            document.querySelectorAll('.dashboard-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const section = card.dataset.section;
+                    switchTab(section);
+                });
+            });
+
+            // Feature Cards
+            document.querySelectorAll('.health-feature, .mental-feature').forEach(card => {
+                card.addEventListener('click', () => {
+                    const feature = card.dataset.feature;
+                    openFeatureModal(feature);
+                });
+            });
+
+            // Initialize Feature Modals
+            initCalorieSmart();
+            initRecipeGenerator();
+            initPostureTracker();
+            initWellnessCheck();
+            initMindGarden();
+            initMoodJournal();
+            initReleasingRitual();
+            initMindAssessment();
+            initReports();
+            initDashboardCharts();
+        }
+
+        // Authentication
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Extract username from email
+            const username = email.split('@')[0];
+            const formattedName = username.replace(/[^a-zA-Z0-9]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            // Set user state
+            appState.user = {
+                email,
+                name: formattedName
+            };
+            
+            // Update UI
+            userName.textContent = formattedName;
+            userAvatar.textContent = formattedName.charAt(0).toUpperCase();
+            greetingName.textContent = formattedName;
+            
+            // Switch to app
+            authContainer.classList.remove('active');
+            appContainer.classList.add('active');
+        }
+
+        function handleLogout() {
+            appState.user = null;
+            appContainer.classList.remove('active');
+            authContainer.classList.add('active');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+            document.body.classList.toggle('light-mode');
+            themeToggle.innerHTML = appState.theme === 'dark' ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
+        }
+
+        // Navigation
+        function switchTab(tabName) {
+            // Update active tab
+            navTabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            
+            // Update active content
+            contentSections.forEach(section => {
+                section.classList.toggle('active', section.id === tabName);
+            });
+        }
+
+        // Feature Modals
+        function openFeatureModal(feature) {
+            const modalId = `${feature}Modal`;
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        // Dashboard Charts
+        function initDashboardCharts() {
+            // Weekly Activity Chart
+            const weeklyActivityCtx = document.getElementById('weeklyActivityChart');
+            if (weeklyActivityCtx) {
+                new Chart(weeklyActivityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Physical Activity',
+                            data: [65, 78, 90, 81, 56, 85, 92],
+                            borderColor: '#FF2EB5',
+                            backgroundColor: 'rgba(255, 46, 181, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'Mental Wellness',
+                            data: [75, 82, 78, 85, 89, 92, 88],
+                            borderColor: '#A855F7',
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#b8c1ec'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#b8c1ec'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#b8c1ec'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Nutrition Chart
+            const nutritionCtx = document.getElementById('nutritionChart');
+            if (nutritionCtx) {
+                new Chart(nutritionCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Proteins', 'Carbs', 'Fats', 'Sugar'],
+                        datasets: [{
+                            data: [25, 45, 20, 10],
+                            backgroundColor: [
+                                '#FF2EB5',
+                                '#A855F7',
+                                '#4ade80',
+                                '#fbbf24'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#b8c1ec',
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Mood Chart
+            const moodCtx = document.getElementById('moodChart');
+            if (moodCtx) {
+                new Chart(moodCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Mood Score',
+                            data: [7, 8, 6, 9, 8, 9, 8],
+                            backgroundColor: '#FF2EB5'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#b8c1ec'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#b8c1ec'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Wellness Chart
+            const wellnessCtx = document.getElementById('wellnessChart');
+            if (wellnessCtx) {
+                new Chart(wellnessCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Physical', 'Mental', 'Nutrition', 'Sleep', 'Hydration', 'Activity'],
+                        datasets: [{
+                            label: 'Current Week',
+                            data: [85, 78, 92, 75, 88, 90],
+                            backgroundColor: 'rgba(255, 46, 181, 0.2)',
+                            borderColor: '#FF2EB5',
+                            pointBackgroundColor: '#FF2EB5'
+                        }, {
+                            label: 'Previous Week',
+                            data: [75, 82, 85, 70, 80, 85],
+                            backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                            borderColor: '#A855F7',
+                            pointBackgroundColor: '#A855F7'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#b8c1ec'
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                pointLabels: {
+                                    color: '#b8c1ec'
+                                },
+                                ticks: {
+                                    color: '#b8c1ec',
+                                    backdropColor: 'transparent'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // CalorieSmart Feature
+        function initCalorieSmart() {
+            const suggestCaloriesBtn = document.getElementById('suggestCaloriesBtn');
+            const analyzeMealBtn = document.getElementById('analyzeMealBtn');
+            const mealCameraPreview = document.getElementById('mealCameraPreview');
+            const mealImageUpload = document.getElementById('mealImageUpload');
+            
+            // Initialize calorie chart
+            const calorieCtx = document.getElementById('calorieChart');
+            if (calorieCtx) {
+                appState.calorieChart = new Chart(calorieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [0, appState.dailyCalorieGoal],
+                            backgroundColor: [
+                                '#FF2EB5',
+                                'rgba(255, 255, 255, 0.1)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Handle image upload
+            if (mealImageUpload) {
+                mealImageUpload.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            appState.uploadedMealImage = event.target.result;
+                            mealCameraPreview.innerHTML = `<img src="${appState.uploadedMealImage}" alt="Meal" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            if (suggestCaloriesBtn) {
+                suggestCaloriesBtn.addEventListener('click', () => {
+                    const age = parseInt(document.getElementById('ageInput').value);
+                    const gender = document.getElementById('genderSelect').value;
+                    const activity = document.getElementById('activitySelect').value;
+                    
+                    if (age && gender && activity) {
+                        // Calculate suggested calories (simplified formula)
+                        let bmr;
+                        if (gender === 'male') {
+                            bmr = 88.362 + (13.397 * 70) + (4.799 * 175) - (5.677 * age);
+                        } else {
+                            bmr = 447.593 + (9.247 * 60) + (3.098 * 165) - (4.330 * age);
+                        }
+                        
+                        let activityMultiplier;
+                        switch (activity) {
+                            case 'sedentary': activityMultiplier = 1.2; break;
+                            case 'light': activityMultiplier = 1.375; break;
+                            case 'moderate': activityMultiplier = 1.55; break;
+                            case 'active': activityMultiplier = 1.725; break;
+                            case 'very-active': activityMultiplier = 1.9; break;
+                        }
+                        
+                        const suggestedCalories = Math.round(bmr * activityMultiplier);
+                        appState.dailyCalorieGoal = suggestedCalories;
+                        document.getElementById('customCalorieInput').value = suggestedCalories;
+                        document.getElementById('calorieTotal').textContent = `${suggestedCalories} kcal`;
+                        
+                        // Update chart
+                        updateCalorieChart();
+                    }
+                });
+            }
+            
+            if (analyzeMealBtn) {
+                analyzeMealBtn.addEventListener('click', () => {
+                    const mealName = document.getElementById('mealNameInput').value || 'Meal';
+                    
+                    // Simulate meal analysis with image or name
+                    // In a real app, you would use an API like Google Vision API or a nutrition API
+                    // For demonstration, we'll use a simplified approach
+                    
+                    // Simulate API call to analyze the meal
+                    analyzeMealBtn.disabled = true;
+                    analyzeMealBtn.textContent = 'Analyzing...';
+                    
+                    setTimeout(() => {
+                        // Generate random nutrition data based on meal name
+                        const mealData = generateNutritionData(mealName);
+                        
+                        // Update nutrition data
+                        appState.nutritionData.calories += mealData.calories;
+                        appState.nutritionData.proteins += mealData.proteins;
+                        appState.nutritionData.carbs += mealData.carbs;
+                        appState.nutritionData.fats += mealData.fats;
+                        appState.nutritionData.sugar += mealData.sugar;
+                        appState.consumedCalories += mealData.calories;
+                        
+                        // Add to daily meals
+                        appState.dailyMeals.push({
+                            name: mealName,
+                            calories: mealData.calories,
+                            time: new Date().toLocaleTimeString()
+                        });
+                        
+                        // Update UI
+                        updateNutritionDisplay();
+                        updateMealsList();
+                        updateCalorieChart();
+                        
+                        // Reset button
+                        analyzeMealBtn.disabled = false;
+                        analyzeMealBtn.textContent = '📸 Analyze Meal';
+                    }, 2000);
+                });
+            }
+            
+            // Custom calorie input
+            document.getElementById('customCalorieInput')?.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                if (value > 0) {
+                    appState.dailyCalorieGoal = value;
+                    document.getElementById('calorieTotal').textContent = `${value} kcal`;
+                    updateCalorieChart();
+                }
+            });
+        }
+
+        // Generate nutrition data based on meal name
+        function generateNutritionData(mealName) {
+            // This is a simplified version - in a real app, you would use a nutrition API
+            // You could integrate with APIs like:
+            // - Edamam Nutrition API: https://developer.edamam.com/edamam-nutrition-api
+            // - USDA FoodData Central API: https://fdc.nal.usda.gov/api-guide.html
+            // - Google Cloud Vision API + Nutrition database
+            
+            // Base nutrition values
+            let calories = 300;
+            let proteins = 15;
+            let carbs = 40;
+            let fats = 10;
+            let sugar = 8;
+            
+            // Adjust based on meal name keywords
+            const name = mealName.toLowerCase();
+            
+            if (name.includes('salad') || name.includes('vegetable')) {
+                calories = Math.floor(calories * 0.7);
+                proteins = Math.floor(proteins * 0.8);
+                carbs = Math.floor(carbs * 0.6);
+                fats = Math.floor(fats * 0.5);
+                sugar = Math.floor(sugar * 0.5);
+            } else if (name.includes('burger') || name.includes('pizza') || name.includes('fried')) {
+                calories = Math.floor(calories * 1.8);
+                proteins = Math.floor(proteins * 1.2);
+                carbs = Math.floor(carbs * 1.3);
+                fats = Math.floor(fats * 2.0);
+                sugar = Math.floor(sugar * 1.2);
+            } else if (name.includes('chicken') || name.includes('meat') || name.includes('fish')) {
+                calories = Math.floor(calories * 1.2);
+                proteins = Math.floor(proteins * 1.8);
+                carbs = Math.floor(carbs * 0.8);
+                fats = Math.floor(fats * 1.1);
+            } else if (name.includes('rice') || name.includes('pasta') || name.includes('bread')) {
+                calories = Math.floor(calories * 1.3);
+                proteins = Math.floor(proteins * 0.7);
+                carbs = Math.floor(carbs * 1.5);
+                fats = Math.floor(fats * 0.8);
+            } else if (name.includes('dessert') || name.includes('cake') || name.includes('ice cream')) {
+                calories = Math.floor(calories * 1.5);
+                proteins = Math.floor(proteins * 0.5);
+                carbs = Math.floor(carbs * 1.4);
+                fats = Math.floor(fats * 1.2);
+                sugar = Math.floor(sugar * 2.5);
+            }
+            
+            // Add some randomness
+            calories += Math.floor(Math.random() * 100) - 50;
+            proteins += Math.floor(Math.random() * 10) - 5;
+            carbs += Math.floor(Math.random() * 15) - 7;
+            fats += Math.floor(Math.random() * 8) - 4;
+            sugar += Math.floor(Math.random() * 5) - 2;
+            
+            // Ensure minimum values
+            calories = Math.max(100, calories);
+            proteins = Math.max(5, proteins);
+            carbs = Math.max(10, carbs);
+            fats = Math.max(3, fats);
+            sugar = Math.max(1, sugar);
+            
+            return {
+                calories,
+                proteins,
+                carbs,
+                fats,
+                sugar
+            };
+        }
+
+        function updateCalorieChart() {
+            if (appState.calorieChart) {
+                const remaining = Math.max(0, appState.dailyCalorieGoal - appState.consumedCalories);
+                appState.calorieChart.data.datasets[0].data = [appState.consumedCalories, remaining];
+                appState.calorieChart.update();
+            }
+        }
+
+        function updateNutritionDisplay() {
+            document.getElementById('totalCalories').textContent = `${appState.nutritionData.calories} kcal`;
+            document.getElementById('totalProteins').textContent = `${appState.nutritionData.proteins}g`;
+            document.getElementById('totalCarbs').textContent = `${appState.nutritionData.carbs}g`;
+            document.getElementById('totalFats').textContent = `${appState.nutritionData.fats}g`;
+            document.getElementById('totalSugar').textContent = `${appState.nutritionData.sugar}g`;
+            document.getElementById('calorieConsumed').textContent = appState.consumedCalories;
+        }
+
+        function updateMealsList() {
+            const mealsList = document.getElementById('mealsList');
+            if (mealsList) {
+                mealsList.innerHTML = '';
+                appState.dailyMeals.forEach(meal => {
+                    const mealItem = document.createElement('div');
+                    mealItem.className = 'meal-item';
+                    mealItem.innerHTML = `
+                        <span class="meal-name">${meal.name}</span>
+                        <span class="meal-calories">${meal.calories} kcal</span>
+                    `;
+                    mealsList.appendChild(mealItem);
+                });
+            }
+        }
+
+        // Recipe Generator Feature
+        function initRecipeGenerator() {
+            const ingredientsGrid = document.getElementById('ingredientsGrid');
+            const generateRecipeBtn = document.getElementById('generateRecipeBtnModal');
+            const cravingSelect = document.getElementById('cravingSelect');
+            
+            // Populate ingredients
+            const ingredients = [
+                'Chicken', 'Beef', 'Fish', 'Eggs', 'Tofu', 'Rice', 'Pasta', 'Bread',
+                'Potatoes', 'Tomatoes', 'Onions', 'Garlic', 'Carrots', 'Broccoli',
+                'Spinach', 'Mushrooms', 'Bell Peppers', 'Cucumber', 'Lettuce', 'Avocado',
+                'Banana', 'Apple', 'Orange', 'Berries', 'Yogurt', 'Milk', 'Cheese',
+                'Beans', 'Lentils', 'Nuts', 'Olive Oil', 'Butter', 'Flour', 'Sugar'
+            ];
+            
+            if (ingredientsGrid) {
+                ingredients.forEach(ingredient => {
+                    const ingredientDiv = document.createElement('div');
+                    ingredientDiv.className = 'ingredient-checkbox';
+                    ingredientDiv.innerHTML = `
+                        <input type="checkbox" id="ingredient-${ingredient}" value="${ingredient}">
+                        <label for="ingredient-${ingredient}">${ingredient}</label>
+                    `;
+                    ingredientsGrid.appendChild(ingredientDiv);
+                });
+            }
+            
+            if (generateRecipeBtn) {
+                generateRecipeBtn.addEventListener('click', () => {
+                    const selectedIngredients = Array.from(document.querySelectorAll('.ingredient-checkbox input:checked'))
+                        .map(input => input.value);
+                    const craving = cravingSelect.value;
+                    
+                    if (selectedIngredients.length > 0 || craving) {
+                        generateRecipe(selectedIngredients, craving);
+                    }
+                });
+            }
+        }
+
+        function generateRecipe(ingredients, craving) {
+            const recipeResult = document.getElementById('recipeResult');
+            const recipeTitle = document.getElementById('recipeTitle');
+            const recipeIngredients = document.getElementById('recipeIngredients');
+            const recipeInstructions = document.getElementById('recipeInstructions');
+            const healthScore = document.getElementById('healthScore');
+            
+            // Generate recipe based on ingredients and craving
+            let title, ingredientsList, instructions, score;
+            
+            if (craving) {
+                // Generate healthy alternative for craving
+                const alternatives = {
+                    'ice-cream': {
+                        title: 'Frozen Banana Nice Cream',
+                        ingredients: ['Bananas', 'Vanilla extract', 'A pinch of salt'],
+                        instructions: [
+                            'Peel and slice bananas, freeze for 4 hours',
+                            'Blend frozen bananas in a food processor',
+                            'Add vanilla and salt, blend until creamy',
+                            'Serve immediately or freeze for later'
+                        ],
+                        score: 9.0
+                    },
+                    'chocolate': {
+                        title: 'Dark Chocolate Avocado Mousse',
+                        ingredients: ['Avocado', 'Cocoa powder', 'Maple syrup', 'Vanilla extract'],
+                        instructions: [
+                            'Blend avocado until smooth',
+                            'Add cocoa powder, maple syrup, and vanilla',
+                            'Blend until creamy',
+                            'Chill for 30 minutes before serving'
+                        ],
+                        score: 8.5
+                    },
+                    'chips': {
+                        title: 'Baked Kale Chips',
+                        ingredients: ['Kale', 'Olive oil', 'Salt', 'Paprika'],
+                        instructions: [
+                            'Preheat oven to 350°F (175°C)',
+                            'Tear kale into bite-sized pieces',
+                            'Toss with olive oil and seasonings',
+                            'Bake for 10-15 minutes until crispy'
+                        ],
+                        score: 9.2
+                    },
+                    'pizza': {
+                        title: 'Cauliflower Pizza Crust',
+                        ingredients: ['Cauliflower', 'Egg', 'Cheese', 'Italian herbs'],
+                        instructions: [
+                            'Grate cauliflower and microwave for 5 minutes',
+                            'Squeeze out excess water',
+                            'Mix with egg, cheese, and herbs',
+                            'Press into pizza shape and bake for 15 minutes',
+                            'Add toppings and bake until cheese melts'
+                        ],
+                        score: 8.0
+                    },
+                    'burger': {
+                        title: 'Black Bean Burger',
+                        ingredients: ['Black beans', 'Bread crumbs', 'Onion', 'Garlic', 'Spices'],
+                        instructions: [
+                            'Mash black beans in a bowl',
+                            'Add bread crumbs, diced onion, garlic, and spices',
+                            'Form into patties',
+                            'Pan-fry or bake until golden brown'
+                        ],
+                        score: 8.7
+                    },
+                    'soda': {
+                        title: 'Infused Sparkling Water',
+                        ingredients: ['Sparkling water', 'Fresh fruits', 'Herbs'],
+                        instructions: [
+                            'Choose your favorite fruits (berries, citrus, melon)',
+                            'Add fruits and herbs to a pitcher',
+                            'Pour sparkling water over fruits',
+                            'Let infuse for 30 minutes before serving'
+                        ],
+                        score: 9.5
+                    },
+                    'candy': {
+                        title: 'Date Energy Balls',
+                        ingredients: ['Dates', 'Nuts', 'Cocoa powder', 'Coconut flakes'],
+                        instructions: [
+                            'Pit dates and soak in warm water for 10 minutes',
+                            'Blend dates with nuts and cocoa powder',
+                            'Form into small balls',
+                            'Roll in coconut flakes and refrigerate'
+                        ],
+                        score: 8.8
+                    },
+                    'fried-food': {
+                        title: 'Air-Fried Vegetables',
+                        ingredients: ['Vegetables of choice', 'Olive oil', 'Spices'],
+                        instructions: [
+                            'Cut vegetables into bite-sized pieces',
+                            'Toss with olive oil and spices',
+                            'Air fry at 400°F (200°C) for 15-20 minutes',
+                            'Shake basket halfway through cooking'
+                        ],
+                        score: 9.0
+                    }
+                };
+                
+                const alternative = alternatives[craving];
+                title = alternative.title;
+                ingredientsList = alternative.ingredients;
+                instructions = alternative.instructions;
+                score = alternative.score;
+            } else {
+                // Generate recipe based on ingredients
+                // This is where you would integrate with a recipe API like:
+                // - Spoonacular API: https://spoonacular.com/food-api
+                // - Edamam Recipe API: https://developer.edamam.com/edamam-recipe-api
+                // - Yummly API: https://developer.yummly.com/
+                
+                // For now, we'll create a simple recipe based on the ingredients
+                const mainIngredient = ingredients[0];
+                const secondaryIngredients = ingredients.slice(1, 4);
+                
+                // Determine recipe type based on main ingredient
+                let recipeType = 'stir-fry';
+                if (mainIngredient === 'Chicken' || mainIngredient === 'Beef' || mainIngredient === 'Fish') {
+                    recipeType = 'grilled';
+                } else if (mainIngredient === 'Pasta' || mainIngredient === 'Rice') {
+                    recipeType = 'dish';
+                } else if (mainIngredient === 'Eggs') {
+                    recipeType = 'omelette';
+                } else if (mainIngredient === 'Tofu') {
+                    recipeType = 'scramble';
+                }
+                
+                // Generate title
+                title = `Healthy ${mainIngredient} ${recipeType.charAt(0).toUpperCase() + recipeType.slice(1)}`;
+                
+                // Generate ingredients list
+                ingredientsList = [
+                    mainIngredient,
+                    ...secondaryIngredients,
+                    'Olive oil',
+                    'Salt and pepper to taste',
+                    'Herbs and spices of choice'
+                ];
+                
+                // Generate instructions based on recipe type
+                if (recipeType === 'stir-fry') {
+                    instructions = [
+                        'Heat oil in a pan over medium-high heat',
+                        `Add ${mainIngredient} and cook until golden`,
+                        'Add vegetables and stir-fry for 5 minutes',
+                        'Season with salt, pepper, and herbs',
+                        'Serve hot with rice or quinoa'
+                    ];
+                } else if (recipeType === 'grilled') {
+                    instructions = [
+                        'Preheat grill to medium-high heat',
+                        `Season ${mainIngredient} with salt, pepper, and herbs`,
+                        'Grill for 4-6 minutes per side until cooked through',
+                        'Let rest for 5 minutes before serving',
+                        'Serve with grilled vegetables'
+                    ];
+                } else if (recipeType === 'dish') {
+                    instructions = [
+                        'Cook pasta or rice according to package directions',
+                        `In a separate pan, sauté ${mainIngredient} until cooked`,
+                        'Add vegetables and cook until tender',
+                        'Combine with pasta or rice',
+                        'Season and serve hot'
+                    ];
+                } else if (recipeType === 'omelette') {
+                    instructions = [
+                        'Beat eggs with a splash of milk',
+                        'Heat oil in a non-stick pan',
+                        `Add ${mainIngredient} and other ingredients to the pan`,
+                        'Pour eggs over ingredients',
+                        'Cook until set, then fold and serve'
+                    ];
+                } else if (recipeType === 'scramble') {
+                    instructions = [
+                        'Heat oil in a pan over medium heat',
+                        `Crumble ${mainIngredient} into the pan`,
+                        'Add vegetables and cook until tender',
+                        'Season with spices and herbs',
+                        'Cook until heated through and serve'
+                    ];
+                }
+                
+                // Calculate health score based on ingredients
+                score = 8.0;
+                if (ingredients.includes('Vegetables') || ingredients.includes('Spinach') || 
+                    ingredients.includes('Broccoli') || ingredients.includes('Tomatoes')) {
+                    score += 0.5;
+                }
+                if (ingredients.includes('Olive Oil')) {
+                    score += 0.3;
+                }
+                if (ingredients.includes('Fish')) {
+                    score += 0.4;
+                }
+                if (ingredients.includes('Tofu')) {
+                    score += 0.3;
+                }
+                if (ingredients.includes('Butter') || ingredients.includes('Sugar')) {
+                    score -= 0.3;
+                }
+                
+                score = Math.min(10, Math.max(5, score));
+            }
+            
+            // Update UI
+            recipeTitle.textContent = title;
+            recipeIngredients.innerHTML = ingredientsList.map(ing => `<li>${ing}</li>`).join('');
+            recipeInstructions.innerHTML = instructions.map(inst => `<li>${inst}</li>`).join('');
+            healthScore.textContent = `${score.toFixed(1)}/10`;
+            
+            // Show result
+            recipeResult.classList.add('active');
+        }
+
+        // Posture Tracker Feature
+        function initPostureTracker() {
+            const startPostureTracking = document.getElementById('startPostureTracking');
+            const postureCamera = document.getElementById('postureCamera');
+            const postureStatus = document.getElementById('postureStatus');
+            
+            if (startPostureTracking) {
+                startPostureTracking.addEventListener('click', () => {
+                    appState.postureTracking = !appState.postureTracking;
+                    
+                    if (appState.postureTracking) {
+                        startPostureTracking.textContent = 'Stop Tracking';
+                        
+                        // Simulate camera activation
+                        postureCamera.innerHTML = `
+                            <video id="postureVideo" autoplay style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <canvas id="postureCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                        `;
+                        
+                        // Try to access camera
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(stream => {
+                                const video = document.getElementById('postureVideo');
+                                video.srcObject = stream;
+                                
+                                // In a real app, you would use a pose detection library like:
+                                // - TensorFlow.js PoseNet: https://github.com/tensorflow/tfjs-models/tree/master/pose-detection
+                                // - MediaPipe Pose: https://mediapipe.dev/google/mediapipe/solutions/pose.html
+                                // - OpenPose: https://github.com/CMU-Perceptual-Computing-Lab/openpose
+                                
+                                // For this demo, we'll simulate posture detection
+                                const postureInterval = setInterval(() => {
+                                    if (!appState.postureTracking) {
+                                        clearInterval(postureInterval);
+                                        stream.getTracks().forEach(track => track.stop());
+                                        return;
+                                    }
+                                    
+                                    // Simulate random posture detection
+                                    const isGoodPosture = Math.random() > 0.3;
+                                    postureStatus.textContent = isGoodPosture ? 
+                                        'Perfect Posture 🌟' : 
+                                        'Straighten Your Back 🔄';
+                                    postureStatus.className = isGoodPosture ? 
+                                        'posture-status good' : 
+                                        'posture-status bad';
+                                    
+                                    // Draw posture outline (simplified)
+                                    const canvas = document.getElementById('postureCanvas');
+                                    const ctx = canvas.getContext('2d');
+                                    canvas.width = video.videoWidth || 640;
+                                    canvas.height = video.videoHeight || 480;
+                                    
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                    ctx.strokeStyle = isGoodPosture ? '#4ade80' : '#f87171';
+                                    ctx.lineWidth = 3;
+                                    
+                                    // Draw simplified posture outline
+                                    ctx.beginPath();
+                                    // Head
+                                    ctx.arc(canvas.width / 2, canvas.height * 0.2, 30, 0, 2 * Math.PI);
+                                    // Body
+                                    ctx.moveTo(canvas.width / 2, canvas.height * 0.23);
+                                    ctx.lineTo(canvas.width / 2, canvas.height * 0.6);
+                                    // Arms
+                                    ctx.moveTo(canvas.width / 2, canvas.height * 0.3);
+                                    ctx.lineTo(canvas.width * 0.3, canvas.height * 0.5);
+                                    ctx.moveTo(canvas.width / 2, canvas.height * 0.3);
+                                    ctx.lineTo(canvas.width * 0.7, canvas.height * 0.5);
+                                    // Legs
+                                    ctx.moveTo(canvas.width / 2, canvas.height * 0.6);
+                                    ctx.lineTo(canvas.width * 0.4, canvas.height * 0.9);
+                                    ctx.moveTo(canvas.width / 2, canvas.height * 0.6);
+                                    ctx.lineTo(canvas.width * 0.6, canvas.height * 0.9);
+                                    ctx.stroke();
+                                }, 3000);
+                            })
+                            .catch(err => {
+                                console.error('Error accessing camera:', err);
+                                // Fallback to placeholder
+                                postureCamera.innerHTML = '<div class="camera-placeholder"><i class="fas fa-video"></i></div>';
+                                
+                                // Simulate posture detection without camera
+                                const postureInterval = setInterval(() => {
+                                    if (!appState.postureTracking) {
+                                        clearInterval(postureInterval);
+                                        return;
+                                    }
+                                    
+                                    const isGoodPosture = Math.random() > 0.3;
+                                    postureStatus.textContent = isGoodPosture ? 
+                                        'Perfect Posture 🌟' : 
+                                        'Straighten Your Back 🔄';
+                                    postureStatus.className = isGoodPosture ? 
+                                        'posture-status good' : 
+                                        'posture-status bad';
+                                }, 3000);
+                            });
+                    } else {
+                        startPostureTracking.textContent = 'Start Tracking';
+                        postureCamera.innerHTML = '<div class="camera-placeholder"><i class="fas fa-video"></i></div>';
+                    }
+                });
+            }
+        }
+
+        // Daily Wellness Check Feature
+        function initWellnessCheck() {
+            const wellnessQuestionsContainer = document.getElementById('wellnessQuestionsContainer');
+            const submitWellnessCheck = document.getElementById('submitWellnessCheck');
+            
+            // Wellness questions
+            const wellnessQuestions = [
+                'Did you stay hydrated today?',
+                'Did you get at least 7 hours of sleep?',
+                'Did you engage in physical activity?',
+                'Did you eat at least 3 balanced meals?',
+                'Did you take breaks from screen time?',
+                'Did you practice mindfulness or meditation?',
+                'Did you connect with friends or family?',
+                'Did you spend time outdoors?',
+                'Did you avoid processed foods?',
+                'Did you manage stress effectively?'
+            ];
+            
+            // Populate questions
+            if (wellnessQuestionsContainer) {
+                wellnessQuestions.forEach((question, index) => {
+                    const questionCard = document.createElement('div');
+                    questionCard.className = 'question-card';
+                    questionCard.innerHTML = `
+                        <div class="question-text">${index + 1}. ${question}</div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-question="${index}" data-answer="yes">Yes</button>
+                            <button class="answer-btn" data-question="${index}" data-answer="no">No</button>
+                            <button class="answer-btn" data-question="${index}" data-answer="somewhat">Somewhat</button>
+                        </div>
+                    `;
+                    wellnessQuestionsContainer.appendChild(questionCard);
+                });
+                
+                // Add event listeners to answer buttons
+                document.querySelectorAll('.answer-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const question = btn.dataset.question;
+                        document.querySelectorAll(`.answer-btn[data-question="${question}"]`).forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        btn.classList.add('selected');
+                    });
+                });
+            }
+            
+            if (submitWellnessCheck) {
+                submitWellnessCheck.addEventListener('click', () => {
+                    // Calculate wellness score
+                    const selectedAnswers = document.querySelectorAll('.answer-btn.selected');
+                    let score = 0;
+                    
+                    selectedAnswers.forEach(btn => {
+                        const answer = btn.dataset.answer;
+                        if (answer === 'yes') score += 10;
+                        else if (answer === 'somewhat') score += 5;
+                    });
+                    
+                    const percentage = Math.round((score / (wellnessQuestions.length * 10)) * 100);
+                    
+                    // Generate recommendations based on score
+                    let recommendations = [];
+                    
+                    if (percentage < 50) {
+                        recommendations = [
+                            'Focus on establishing a consistent sleep schedule',
+                            'Try to drink more water throughout the day',
+                            'Incorporate short walks into your daily routine',
+                            'Practice deep breathing exercises for stress management'
+                        ];
+                    } else if (percentage < 80) {
+                        recommendations = [
+                            'Continue building on your healthy habits',
+                            'Try to increase your physical activity gradually',
+                            'Consider adding more vegetables to your meals',
+                            'Make time for social connections'
+                        ];
+                    } else {
+                        recommendations = [
+                            'Maintain your excellent wellness routine',
+                            'Share your healthy habits with friends and family',
+                            'Consider setting new health goals',
+                            'Continue prioritizing self-care'
+                        ];
+                    }
+                    
+                    // Update UI
+                    document.getElementById('wellnessScore').textContent = `${percentage}%`;
+                    document.getElementById('wellnessRecommendations').innerHTML = 
+                        recommendations.map(rec => `<li>${rec}</li>`).join('');
+                    
+                    // Show report
+                    document.getElementById('wellnessReport').classList.add('active');
+                    
+                    // Save report
+                    saveReport('Daily Wellness Check', {
+                        date: new Date().toISOString(),
+                        score: percentage,
+                        recommendations: recommendations
+                    });
+                });
+            }
+        }
+
+        // Mind Garden Feature
+        function initMindGarden() {
+            const addDeedBtn = document.getElementById('addDeedBtn');
+            const deedInput = document.getElementById('deedInput');
+            const gardenContainer = document.getElementById('gardenContainer');
+            
+            if (addDeedBtn) {
+                addDeedBtn.addEventListener('click', () => {
+                    const deed = deedInput.value.trim();
+                    if (deed) {
+                        // Calculate position for equal spacing
+                        const flowerCount = appState.gardenFlowers.length;
+                        const maxFlowers = 10;
+                        const spacing = 80 / maxFlowers; // 80% of container width
+                        const leftPosition = 10 + (flowerCount % maxFlowers) * spacing;
+                        const rowPosition = Math.floor(flowerCount / maxFlowers);
+                        const bottomPosition = 100 + rowPosition * 80;
+                        
+                        // Add flower to garden
+                        const flower = document.createElement('div');
+                        flower.className = 'flower';
+                        flower.style.left = `${leftPosition}%`;
+                        flower.style.bottom = `${bottomPosition}px`;
+                        
+                        const flowerStem = document.createElement('div');
+                        flowerStem.className = 'flower-stem';
+                        
+                        const flowerHead = document.createElement('div');
+                        flowerHead.className = 'flower-head';
+                        flowerHead.textContent = ['🌸', '🌺', '🌻', '🌷', '🌹', '🌼', '🌵', '🌾'][Math.floor(Math.random() * 8)];
+                        
+                        const flowerTooltip = document.createElement('div');
+                        flowerTooltip.className = 'flower-tooltip';
+                        flowerTooltip.textContent = deed;
+                        
+                        flower.appendChild(flowerStem);
+                        flower.appendChild(flowerHead);
+                        flower.appendChild(flowerTooltip);
+                        
+                        gardenContainer.appendChild(flower);
+                        
+                        // Clear input
+                        deedInput.value = '';
+                        
+                        // Add to state
+                        appState.gardenFlowers.push(deed);
+                    }
+                });
+            }
+        }
+
+        // Mood Journal Feature
+        function initMoodJournal() {
+            const moodOptions = document.querySelectorAll('.mood-option');
+            const saveJournalBtn = document.getElementById('saveJournalBtn');
+            const downloadJournalBtn = document.getElementById('downloadJournalBtn');
+            const playStoriesBtn = document.getElementById('playStoriesBtn');
+            const playMusicBtn = document.getElementById('playMusicBtn');
+            
+            moodOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    moodOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    appState.selectedMood = option.dataset.mood;
+                });
+            });
+            
+            if (saveJournalBtn) {
+                saveJournalBtn.addEventListener('click', () => {
+                    const journalText = document.getElementById('journalText').value;
+                    
+                    if (journalText && appState.selectedMood) {
+                        // Save journal entry
+                        const journalEntry = {
+                            date: new Date().toISOString(),
+                            mood: appState.selectedMood,
+                            text: journalText
+                        };
+                        
+                        appState.journalEntries.push(journalEntry);
+                        
+                        // Show success message
+                        saveJournalBtn.textContent = 'Journal Saved!';
+                        setTimeout(() => {
+                            saveJournalBtn.textContent = 'Save Journal';
+                        }, 2000);
+                    }
+                });
+            }
+            
+            if (downloadJournalBtn) {
+                downloadJournalBtn.addEventListener('click', () => {
+                    const journalText = document.getElementById('journalText').value;
+                    
+                    if (journalText && appState.selectedMood) {
+                        // Create a text file with the journal entry
+                        const moodLabels = {
+                            'very-happy': 'Very Happy',
+                            'happy': 'Happy',
+                            'neutral': 'Neutral',
+                            'sad': 'Sad',
+                            'very-sad': 'Very Sad'
+                        };
+                        
+                        const content = `Date: ${new Date().toLocaleDateString()}\nMood: ${moodLabels[appState.selectedMood]}\n\n${journalText}`;
+                        
+                        const blob = new Blob([content], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `journal-entry-${new Date().toISOString().split('T')[0]}.txt`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        // Show success message
+                        downloadJournalBtn.textContent = 'Downloaded!';
+                        setTimeout(() => {
+                            downloadJournalBtn.textContent = 'Download Entry';
+                        }, 2000);
+                    }
+                });
+            }
+            
+            if (playStoriesBtn) {
+                playStoriesBtn.addEventListener('click', () => {
+                    // In real app, would play calming stories
+                    playStoriesBtn.innerHTML = playStoriesBtn.innerHTML.includes('play') ? 
+                        '<i class="fas fa-pause"></i> Stories' : 
+                        '<i class="fas fa-play"></i> Stories';
+                });
+            }
+            
+            if (playMusicBtn) {
+                playMusicBtn.addEventListener('click', () => {
+                    // In real app, would play calming music
+                    playMusicBtn.innerHTML = playMusicBtn.innerHTML.includes('play') ? 
+                        '<i class="fas fa-pause"></i> Music' : 
+                        '<i class="fas fa-play"></i> Music';
+                });
+            }
+        }
+
+        // Releasing Ritual Feature - Enhanced
+        function initReleasingRitual() {
+            const releaseThoughtBtn = document.getElementById('releaseThoughtBtn');
+            const thoughtInput = document.getElementById('thoughtInput');
+            const ritualAnimation = document.getElementById('ritualAnimation');
+            const thoughtText = document.getElementById('thoughtText');
+            const flame = document.getElementById('flame');
+            const sparks = document.getElementById('sparks');
+            const lantern = document.getElementById('lantern');
+            
+            if (releaseThoughtBtn) {
+                releaseThoughtBtn.addEventListener('click', () => {
+                    const thought = thoughtInput.value.trim();
+                    
+                    if (thought) {
+                        // Show animation
+                        ritualAnimation.classList.add('active');
+                        
+                        // Display the thought
+                        thoughtText.textContent = thought;
+                        thoughtText.style.opacity = '1';
+                        
+                        // Start burning effect after a short delay
+                        setTimeout(() => {
+                            thoughtText.classList.add('burning');
+                            flame.classList.add('active');
+                            
+                            // Create sparks
+                            createSparks();
+                        }, 500);
+                        
+                        // Create lantern after burning starts
+                        setTimeout(() => {
+                            lantern.classList.add('active');
+                        }, 2000);
+                        
+                        // Clear input
+                        thoughtInput.value = '';
+                        
+                        // Hide animation after completion
+                        setTimeout(() => {
+                            ritualAnimation.classList.remove('active');
+                            thoughtText.classList.remove('burning');
+                            flame.classList.remove('active');
+                            lantern.classList.remove('active');
+                            
+                            // Clear sparks
+                            sparks.innerHTML = '';
+                        }, 7000);
+                    }
+                });
+            }
+        }
+        
+        function createSparks() {
+            const sparksContainer = document.getElementById('sparks');
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const spark = document.createElement('div');
+                    spark.className = 'spark';
+                    
+                    // Random position and direction
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const distance = 50 + Math.random() * 100;
+                    const x = Math.cos(angle) * distance;
+                    const y = Math.sin(angle) * distance - 50;
+                    
+                    spark.style.setProperty('--x', `${x}px`);
+                    spark.style.setProperty('--y', `${y}px`);
+                    
+                    sparksContainer.appendChild(spark);
+                    
+                    // Remove spark after animation
+                    setTimeout(() => {
+                        spark.remove();
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+
+        // Mind Assessment Feature
+        function initMindAssessment() {
+            const assessmentQuestions = document.getElementById('assessmentQuestions');
+            const submitAssessmentBtn = document.getElementById('submitAssessmentBtn');
+            
+            // Assessment questions
+            const questions = [
+                {
+                    question: 'How would you rate your sleep quality last night?',
+                    options: ['Excellent - I woke up refreshed', 'Good - I slept well', 'Fair - I had some trouble sleeping', 'Poor - I barely slept']
+                },
+                {
+                    question: 'How would you describe your stress level today?',
+                    options: ['Very relaxed', 'Slightly stressed', 'Moderately stressed', 'Very stressed']
+                },
+                {
+                    question: 'How productive have you been today?',
+                    options: ['Very productive', 'Somewhat productive', 'Not very productive', 'Not productive at all']
+                },
+                {
+                    question: 'How often do you feel overwhelmed?',
+                    options: ['Rarely', 'Sometimes', 'Often', 'Almost always']
+                },
+                {
+                    question: 'How would you rate your overall mood today?',
+                    options: ['Very positive', 'Somewhat positive', 'Neutral', 'Negative']
+                },
+                {
+                    question: 'How often do you practice mindfulness or meditation?',
+                    options: ['Daily', 'A few times a week', 'Rarely', 'Never']
+                },
+                {
+                    question: 'How satisfied are you with your social connections?',
+                    options: ['Very satisfied', 'Somewhat satisfied', 'Not very satisfied', 'Not satisfied at all']
+                },
+                {
+                    question: 'How often do you engage in physical activity?',
+                    options: ['Daily', 'A few times a week', 'Rarely', 'Never']
+                },
+                {
+                    question: 'How would you rate your ability to cope with challenges?',
+                    options: ['Excellent', 'Good', 'Fair', 'Poor']
+                },
+                {
+                    question: 'How often do you feel anxious?',
+                    options: ['Rarely', 'Sometimes', 'Often', 'Almost always']
+                },
+                {
+                    question: 'How would you describe your energy levels today?',
+                    options: ['Very high', 'High', 'Moderate', 'Low']
+                },
+                {
+                    question: 'How often do you take time for self-care?',
+                    options: ['Daily', 'A few times a week', 'Rarely', 'Never']
+                },
+                {
+                    question: 'How would you rate your ability to focus?',
+                    options: ['Excellent', 'Good', 'Fair', 'Poor']
+                },
+                {
+                    question: 'How often do you experience negative thoughts?',
+                    options: ['Rarely', 'Sometimes', 'Often', 'Almost always']
+                },
+                {
+                    question: 'How satisfied are you with your work-life balance?',
+                    options: ['Very satisfied', 'Somewhat satisfied', 'Not very satisfied', 'Not satisfied at all']
+                }
+            ];
+            
+            // Populate questions
+            if (assessmentQuestions) {
+                questions.forEach((q, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'assessment-question';
+                    questionDiv.innerHTML = `
+                        <div class="assessment-question-text">${index + 1}. ${q.question}</div>
+                        <div class="assessment-options">
+                            ${q.options.map((option, optIndex) => 
+                                `<div class="assessment-option" data-question="${index}" data-value="${3-optIndex}">${option}</div>`
+                            ).join('')}
+                        </div>
+                    `;
+                    assessmentQuestions.appendChild(questionDiv);
+                });
+                
+                // Add event listeners to options
+                document.querySelectorAll('.assessment-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        const question = option.dataset.question;
+                        document.querySelectorAll(`.assessment-option[data-question="${question}"]`).forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        option.classList.add('selected');
+                    });
+                });
+            }
+            
+            if (submitAssessmentBtn) {
+                submitAssessmentBtn.addEventListener('click', () => {
+                    // Calculate score
+                    const selectedOptions = document.querySelectorAll('.assessment-option.selected');
+                    let totalScore = 0;
+                    
+                    selectedOptions.forEach(option => {
+                        totalScore += parseInt(option.dataset.value);
+                    });
+                    
+                    const maxScore = questions.length * 3;
+                    const percentage = Math.round((totalScore / maxScore) * 100);
+                    
+                    // Generate recommendations based on score
+                    let recommendations = [];
+                    
+                    if (percentage < 40) {
+                        recommendations = [
+                            'Consider speaking with a mental health professional',
+                            'Practice daily mindfulness exercises for 10 minutes',
+                            'Establish a consistent sleep schedule',
+                            'Try journaling to express your thoughts and feelings',
+                            'Reach out to friends or family for support'
+                        ];
+                    } else if (percentage < 70) {
+                        recommendations = [
+                            'Incorporate stress management techniques into your routine',
+                            'Set aside time for activities you enjoy',
+                            'Practice gratitude by listing three things you\'re thankful for each day',
+                            'Consider limiting screen time before bed',
+                            'Try deep breathing exercises when feeling overwhelmed'
+                        ];
+                    } else {
+                        recommendations = [
+                            'Continue maintaining your healthy mental habits',
+                            'Share your coping strategies with others who might benefit',
+                            'Consider setting new personal growth goals',
+                            'Practice self-compassion during difficult times',
+                            'Maintain your social connections and support network'
+                        ];
+                    }
+                    
+                    // Update UI
+                    document.getElementById('mentalHealthScore').textContent = `Mental Health Score: ${percentage}/100`;
+                    document.getElementById('assessmentRecommendations').innerHTML = 
+                        recommendations.map(rec => `<li>${rec}</li>`).join('');
+                    
+                    // Show result
+                    document.getElementById('assessmentResult').classList.add('active');
+                    
+                    // Save report
+                    saveReport('Mind Assessment', {
+                        date: new Date().toISOString(),
+                        score: percentage,
+                        recommendations: recommendations
+                    });
+                });
+            }
+        }
+
+        // Reports Section
+        function initReports() {
+            // pH Test Report
+            const connectPhSensorBtn = document.getElementById('connectPhSensorBtn');
+            const phIndicator = document.getElementById('phIndicator');
+            const phValue = document.getElementById('phValue');
+            
+            if (connectPhSensorBtn) {
+                connectPhSensorBtn.addEventListener('click', () => {
+                    // Simulate pH sensor connection
+                    const ph = (Math.random() * 4.5 + 4.5).toFixed(1);
+                    const position = ((ph - 4.5) / 4.5) * 100;
+                    
+                    phIndicator.style.left = `${position}%`;
+                    phValue.textContent = ph;
+                    
+                    connectPhSensorBtn.textContent = 'Sensor Connected!';
+                    setTimeout(() => {
+                        connectPhSensorBtn.textContent = 'Connect pH Sensor';
+                    }, 2000);
+                });
+            }
+            
+            // Health Card
+            const healthCardForm = document.getElementById('healthCardForm');
+            const generatedCard = document.getElementById('generatedCard');
+            const downloadCardBtn = document.getElementById('downloadCardBtn');
+            
+            if (healthCardForm) {
+                healthCardForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    // Get form values
+                    const name = document.getElementById('cardName').value;
+                    const age = document.getElementById('cardAge').value;
+                    const gender = document.getElementById('cardGender').value;
+                    const weight = document.getElementById('cardWeight').value;
+                    const height = document.getElementById('cardHeight').value;
+                    const bloodGroup = document.getElementById('cardBloodGroup').value;
+                    const allergies = document.getElementById('cardAllergies').value || 'None';
+                    const activityLevel = document.getElementById('cardActivityLevel').value;
+                    const healthGoal = document.getElementById('cardHealthGoal').value;
+                    
+                    // Calculate BMI
+                    const heightM = height / 100;
+                    const bmi = (weight / (heightM * heightM)).toFixed(1);
+                    
+                    // Determine BMI category
+                    let bmiCategory;
+                    if (bmi < 18.5) {
+                        bmiCategory = 'Underweight';
+                    } else if (bmi < 25) {
+                        bmiCategory = 'Normal';
+                    } else if (bmi < 30) {
+                        bmiCategory = 'Overweight';
+                    } else {
+                        bmiCategory = 'Obese';
+                    }
+                    
+                    // Populate card
+                    document.getElementById('cardDate').textContent = new Date().toLocaleDateString();
+                    document.getElementById('cardInfoName').textContent = name;
+                    document.getElementById('cardInfoAge').textContent = age;
+                    document.getElementById('cardInfoGender').textContent = gender.charAt(0).toUpperCase() + gender.slice(1);
+                    document.getElementById('cardInfoBloodGroup').textContent = bloodGroup;
+                    document.getElementById('cardInfoAllergies').textContent = allergies;
+                    document.getElementById('cardInfoActivityLevel').textContent = activityLevel.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    document.getElementById('bmiValue').textContent = bmi;
+                    document.getElementById('bmiCategory').textContent = bmiCategory;
+                    document.getElementById('cardInfoHealthGoal').textContent = healthGoal;
+                    
+                    // Show card and download button
+                    generatedCard.classList.add('active');
+                    downloadCardBtn.style.display = 'block';
+                });
+            }
+            
+            if (downloadCardBtn) {
+                downloadCardBtn.addEventListener('click', () => {
+                    // Generate PDF
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Add content to PDF
+                    doc.setFontSize(20);
+                    doc.setTextColor(255, 46, 181);
+                    doc.text('Healthara Health Card', 105, 20, { align: 'center' });
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Date: ${document.getElementById('cardDate').textContent}`, 20, 40);
+                    doc.text(`Name: ${document.getElementById('cardInfoName').textContent}`, 20, 50);
+                    doc.text(`Age: ${document.getElementById('cardInfoAge').textContent}`, 20, 60);
+                    doc.text(`Gender: ${document.getElementById('cardInfoGender').textContent}`, 20, 70);
+                    doc.text(`Blood Group: ${document.getElementById('cardInfoBloodGroup').textContent}`, 20, 80);
+                    doc.text(`Allergies: ${document.getElementById('cardInfoAllergies').textContent}`, 20, 90);
+                    doc.text(`Activity Level: ${document.getElementById('cardInfoActivityLevel').textContent}`, 20, 100);
+                    doc.text(`BMI: ${document.getElementById('bmiValue').textContent} (${document.getElementById('bmiCategory').textContent})`, 20, 110);
+                    doc.text(`Health Goal: ${document.getElementById('cardInfoHealthGoal').textContent}`, 20, 120);
+                    
+                    // Save PDF
+                    doc.save('healthara-health-card.pdf');
+                });
+            }
+            
+            // Load saved reports
+            loadSavedReports();
+        }
+
+        function saveReport(type, data) {
+            const report = {
+                id: Date.now(),
+                type: type,
+                data: data,
+                date: new Date().toISOString()
+            };
+            
+            appState.savedReports.push(report);
+            localStorage.setItem('healtharaReports', JSON.stringify(appState.savedReports));
+            loadSavedReports();
+        }
+
+        function loadSavedReports() {
+            const savedReports = localStorage.getItem('healtharaReports');
+            if (savedReports) {
+                appState.savedReports = JSON.parse(savedReports);
+            }
+            
+            const reportsList = document.getElementById('reportsList');
+            if (reportsList) {
+                reportsList.innerHTML = '';
+                
+                if (appState.savedReports.length === 0) {
+                    reportsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No saved reports yet.</p>';
+                    return;
+                }
+                
+                appState.savedReports.forEach(report => {
+                    const reportItem = document.createElement('div');
+                    reportItem.className = 'report-item';
+                    
+                    const reportDate = new Date(report.date).toLocaleDateString();
+                    
+                    reportItem.innerHTML = `
+                        <div class="report-info">
+                            <div class="report-name">${report.type}</div>
+                            <div class="report-date">${reportDate}</div>
+                        </div>
+                        <div class="report-actions">
+                            <button class="view-report-btn" data-report-id="${report.id}">View</button>
+                            <button class="download-report-btn" data-report-id="${report.id}">Download</button>
+                        </div>
+                    `;
+                    
+                    reportsList.appendChild(reportItem);
+                });
+                
+                // Add event listeners to report buttons
+                document.querySelectorAll('.view-report-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const reportId = parseInt(btn.dataset.reportId);
+                        const report = appState.savedReports.find(r => r.id === reportId);
+                        if (report) {
+                            viewReport(report);
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.download-report-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const reportId = parseInt(btn.dataset.reportId);
+                        const report = appState.savedReports.find(r => r.id === reportId);
+                        if (report) {
+                            downloadReport(report);
+                        }
+                    });
+                });
+            }
+        }
+
+        function viewReport(report) {
+            // Create a modal to view the report
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 class="modal-title">${report.type} Report</h2>
+                    <div class="report-content">
+                        <p><strong>Date:</strong> ${new Date(report.date).toLocaleDateString()}</p>
+                        ${report.data.score ? `<p><strong>Score:</strong> ${report.data.score}%</p>` : ''}
+                        ${report.data.recommendations ? `
+                            <h3>Recommendations:</h3>
+                            <ul>
+                                ${report.data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add close functionality
+            modal.querySelector('.modal-close').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
+        function downloadReport(report) {
+            // Generate PDF for the report
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add content to PDF
+            doc.setFontSize(20);
+            doc.setTextColor(255, 46, 181);
+            doc.text(`${report.type} Report`, 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Date: ${new Date(report.date).toLocaleDateString()}`, 20, 40);
+            
+            if (report.data.score) {
+                doc.text(`Score: ${report.data.score}%`, 20, 50);
+            }
+            
+            if (report.data.recommendations) {
+                doc.text('Recommendations:', 20, 60);
+                let yPosition = 70;
+                report.data.recommendations.forEach(rec => {
+                    doc.text(`• ${rec}`, 25, yPosition);
+                    yPosition += 10;
+                });
+            }
+            
+            // Save PDF
+            doc.save(`${report.type.replace(/\s+/g, '-').toLowerCase()}-report.pdf`);
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
